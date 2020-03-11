@@ -1,15 +1,28 @@
 buildscript {
-    ext.log4j_version = '2.13.0'
-    ext.ktor_version = '1.3.0'
-    ext.jsoup_version = '1.12.2'
-}
+    ext {
+        kotlinx_serialization_version = '0.20.0'
+        kotlin_version = '1.3.70'
 
-plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.3.70'
+        log4j_version = '2.13.0'
+        ktor_version = '1.3.0'
+        jsoup_version = '1.12.2'
+    }
+
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath group: 'org.jetbrains.kotlin', name: 'kotlin-gradle-plugin', version: kotlin_version
+        classpath group: 'org.jetbrains.kotlin', name: 'kotlin-serialization', version: kotlin_version
+    }
 }
 
 group 'net.cydhra'
 version '1.0-SNAPSHOT'
+
+apply plugin: 'kotlin'
+apply plugin: 'kotlinx-serialization'
 
 repositories {
     mavenCentral()
@@ -17,6 +30,7 @@ repositories {
 
 dependencies {
     implementation group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib-jdk8'
+    implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-serialization-runtime', version: kotlinx_serialization_version
 
     // server
     implementation group: 'io.ktor', name: 'ktor-server-core', version: ktor_version
