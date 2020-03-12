@@ -17,5 +17,6 @@ class GameInfo(
         Instant.MIN,
         ZoneId.of("Europe/London")
     ),
-    val version: String = ""
+    val version: String = "",
+    val license: String = "unknown"
 )
