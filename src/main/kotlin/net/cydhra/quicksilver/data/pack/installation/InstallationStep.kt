@@ -1,9 +1,9 @@
-package net.cydhra.quicksilver.data.pack
+package net.cydhra.quicksilver.data.pack.installation
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-class InstallationStep(
+open class InstallationStep(
     val type: InstallationStepType
 )
 
