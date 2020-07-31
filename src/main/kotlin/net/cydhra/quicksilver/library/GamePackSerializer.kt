@@ -7,7 +7,9 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.File
 import java.io.OutputStream
-import java.util.zip.*
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
+import java.util.zip.ZipOutputStream
 
 const val GAME_PACK_MAGIC_BYTES = 0x47414d45
 
@@ -33,7 +35,7 @@ class GamePackSerializer(
         dataOut.writeInt(GAME_PACK_MAGIC_BYTES)
         dataOut.writeUTF(json.stringify(GamePackDefinition.serializer(), this.definition))
 
-        val zipOutputStream = ZipOutputStream(DeflaterOutputStream(out))
+        val zipOutputStream = ZipOutputStream(out).apply { setLevel(9) }
         this.paths.forEach { file ->
             zipOutputStream.putNextEntry(ZipEntry(file.name))
             zipOutputStream.write(file.readBytes())
@@ -54,9 +56,9 @@ class GamePackDeserializer(
 ) {
 
     /**
-     * Install the game pack file into the library
+     * Unpack the game pack file into the library
      */
-    fun install() {
+    fun unpack() {
         assert(libraryPath.exists())
         assert(libraryPath.isDirectory)
         assert(gamePackFile.exists())
@@ -80,7 +82,17 @@ class GamePackDeserializer(
         destinationDirectory.mkdir()
         File(destinationDirectory, definition.info.id + ".json").apply { createNewFile() }.writeText(definitionJson)
 
-        val zipInputStream = ZipInputStream(InflaterInputStream(inputStream))
-        // TODO: proceed with installation
+        val zipInputStream = ZipInputStream(inputStream)
+        var currentEntry = zipInputStream.nextEntry
+        while (currentEntry != null) {
+            val outputFile = File(destinationDirectory, currentEntry.name)
+            outputFile.createNewFile()
+            outputFile.writeBytes(zipInputStream.readBytes())
+            zipInputStream.closeEntry()
+
+            currentEntry = zipInputStream.nextEntry
+        }
+
+        zipInputStream.close()
     }
 }
