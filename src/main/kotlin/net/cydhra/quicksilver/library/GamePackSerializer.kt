@@ -58,7 +58,7 @@ class GamePackDeserializer(
     /**
      * Unpack the game pack file into the library
      */
-    fun unpack() {
+    fun unpack(): GamePackDefinition {
         assert(libraryPath.exists())
         assert(libraryPath.isDirectory)
         assert(gamePackFile.exists())
@@ -94,5 +94,6 @@ class GamePackDeserializer(
         }
 
         zipInputStream.close()
+        return definition
     }
 }
