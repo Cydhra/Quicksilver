@@ -3,12 +3,15 @@ package net.cydhra.quicksilver.data.pack.installation
 import kotlinx.serialization.Serializable
 
 @Serializable
-open class InstallationStep(
-    val type: InstallationStepType
+class InstallationStep(
+    val tree: Array<String>,
+    val keep: Boolean,
+    val step: InstallationStepType
 )
 
 @Serializable
 enum class InstallationStepType {
+    UNPACK,
     EXECUTE,
     REGISTRY
 }
