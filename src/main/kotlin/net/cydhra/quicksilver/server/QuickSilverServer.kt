@@ -7,14 +7,14 @@ import io.ktor.features.ContentNegotiation
 import io.ktor.features.DefaultHeaders
 import io.ktor.routing.Routing
 import io.ktor.routing.get
-import io.ktor.serialization.serialization
+import io.ktor.serialization.json
 
 @Suppress("unused")
 fun Application.main() {
     install(DefaultHeaders)
     install(CallLogging)
     install(ContentNegotiation) {
-        serialization()
+        json()
     }
     install(Routing) {
         get("game/install", {})
