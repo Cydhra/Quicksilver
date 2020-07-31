@@ -1,5 +1,6 @@
 package net.cydhra.quicksilver.data.pack.installation
 
+import com.profesorfalken.jpowershell.PowerShell
 import kotlinx.serialization.Serializable
 import java.io.File
 
@@ -14,14 +15,24 @@ sealed class InstallationStrategy {
     ) : InstallationStrategy() {
 
         override fun install(basePath: File) {
-            TODO("not implemented")
+            val powerShell = PowerShell.openSession()
+                .executeCommandAndChain("\$newProcess = new-object System.Diagnostics.ProcessStartInfo \"$path\"")
+                .executeCommandAndChain("\$newProcess.Arguments = \"$arguments\"")
+
+            if (elevated) {
+                powerShell.executeCommandAndChain("\$newProcess.Verb = \"runas\"")
+            }
+
+            powerShell
+                .executeCommandAndChain("[System.Diagnostics.Process]::Start(\$newProcess)")
+                .close()
         }
     }
 
     @Serializable
     class RegistryStrategy(val file: String) : InstallationStrategy() {
         override fun install(basePath: File) {
-            TODO("not implemented")
+            PowerShell.executeSingleCommand("REG IMPORT $file")
         }
     }
 
