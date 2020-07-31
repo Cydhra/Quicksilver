@@ -27,9 +27,9 @@ fun Application.main() {
     install(CallLogging)
     install(Routing) {
         get(START_GAME_ENDPOINT) interceptor@{
-            val articleUrl = call.request.queryParameters["id"]
+            val gameId = call.request.queryParameters["id"]
 
-            if (articleUrl == null) {
+            if (gameId == null) {
                 call.respond(HttpStatusCode.BadRequest)
                 return@interceptor
             }
