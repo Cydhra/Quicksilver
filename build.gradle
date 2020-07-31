@@ -27,6 +27,7 @@ apply plugin: 'kotlinx-serialization'
 
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -46,7 +47,7 @@ dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: log4j_version
 
     // system
-    compile group: 'com.profesorfalken', name: 'jPowerShell', version: '3.1.1'
+    compile group: 'com.github.Cydhra', name: 'jPowerShell', version: 'master'
 
     // testing
     testCompile group: 'org.assertj', name: 'assertj-core', version: '3.11.1'
