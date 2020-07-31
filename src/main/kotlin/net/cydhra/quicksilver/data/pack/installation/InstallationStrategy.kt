@@ -1,8 +1,8 @@
 package net.cydhra.quicksilver.data.pack.installation
 
 import com.profesorfalken.jpowershell.PowerShell
-import com.profesorfalken.jpowershell.PowerShellResponseHandler
 import kotlinx.serialization.Serializable
+import net.cydhra.quicksilver.environment.Environment
 import java.io.File
 
 @Serializable
@@ -19,21 +19,7 @@ sealed class InstallationStrategy {
         override fun install(basePath: File) {
             val executable = File(basePath, path)
             val workingDirectory = File(basePath, workingDir)
-
-            val powerShell = PowerShell.openSession()
-                .executeCommandAndChain("cd ${basePath.absolutePath}")
-                .executeCommandAndChain("\$newProcess = new-object System.Diagnostics.ProcessStartInfo \"${executable.absolutePath}\"")
-                .executeCommandAndChain("\$newProcess.Arguments = \"$arguments\"")
-                .executeCommandAndChain("\$newProcess.WorkingDirectory = \"${workingDirectory.absolutePath}\"")
-
-            if (elevated) {
-                powerShell.executeCommandAndChain("\$newProcess.Verb = \"runas\"")
-            }
-
-            powerShell
-                .executeCommandAndChain("[System.Diagnostics.Process]::Start(\$newProcess)",
-                    PowerShellResponseHandler { response -> println(response.commandOutput) })
-                .close()
+            Environment.startProcess(workingDirectory, executable, arguments, elevated)
         }
     }
 
