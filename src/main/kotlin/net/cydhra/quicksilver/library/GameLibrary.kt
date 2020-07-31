@@ -18,15 +18,14 @@ class GameLibrary(val path: String) {
     private val libraryDirectory = File(path)
     private val configFile = File(libraryDirectory, ".library")
 
-    private val installedGames: HashMap<String, GamePackDefinition> = hashMapOf()
+    private val installedGames: HashMap<String, File> = hashMapOf()
 
     fun initLibrary() {
         if (configFile.exists()) {
             val games = json.parse(String.serializer().list, configFile.readText())
             installedGames.putAll(games.map { game ->
                 val definitionFile = File(File(libraryDirectory, game), "$game.json")
-                val definition = json.parse(GamePackDefinition.serializer(), definitionFile.readText())
-                game to definition
+                game to definitionFile
             })
         } else {
             configFile.createNewFile()
@@ -45,13 +44,15 @@ class GameLibrary(val path: String) {
             step.install(gameDirectory)
         }
 
-        installedGames[gameDefinition.info.id] = gameDefinition
+        installedGames[gameDefinition.info.id] = File(gameDirectory, gameDefinition.info.id + ".json")
         storeState()
     }
 
     fun startGame(id: String) {
-        val definition = this.installedGames[id] ?: throw IllegalArgumentException("unknown game id")
-        val gameDirectory = File(this.libraryDirectory, definition.info.id)
+        val definitionFile = this.installedGames[id] ?: throw IllegalArgumentException("unknown game id")
+        val gameDirectory = definitionFile.parent
+        val definition = json.parse(GamePackDefinition.serializer(), definitionFile.readText())
+
         val workingDirectory = File(gameDirectory, definition.execution.workingDirectory)
         val executable = File(gameDirectory, definition.execution.path)
 
