@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 class InstallationStep(
     val tree: Array<String>,
     val keep: Boolean,
-    val step: InstallationStepType
+    val type: InstallationStepType
 )
 
 @Serializable
