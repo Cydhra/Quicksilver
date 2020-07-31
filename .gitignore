@@ -5,3 +5,7 @@
 # gradle
 build
 .gradle
+
+# project
+run/*
+!run/.gitkeep
