@@ -110,10 +110,14 @@ class GamePackDeserializer(
         var currentEntry = zipInputStream.nextEntry
         while (currentEntry != null) {
             val outputFile = File(destinationDirectory, currentEntry.name)
-            outputFile.createNewFile()
-            outputFile.writeBytes(zipInputStream.readBytes())
-            zipInputStream.closeEntry()
+            if (currentEntry.isDirectory) {
+                outputFile.mkdir()
+            } else {
+                outputFile.createNewFile()
+                outputFile.writeBytes(zipInputStream.readBytes())
+            }
 
+            zipInputStream.closeEntry()
             currentEntry = zipInputStream.nextEntry
         }
 
