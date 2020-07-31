@@ -1,4 +1,4 @@
-package net.cydhra.quicksilver
+package net.cydhra.quicksilver.server
 
 import io.ktor.application.Application
 import io.ktor.application.call
@@ -9,6 +9,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import io.ktor.routing.Routing
 import io.ktor.routing.get
+import net.cydhra.quicksilver.launcher.QuicksilverLauncher
 
 /**
  * path where all game related endpoints are
@@ -32,6 +33,8 @@ fun Application.main() {
             if (gameId == null) {
                 call.respond(HttpStatusCode.BadRequest)
                 return@interceptor
+            } else {
+                QuicksilverLauncher.runGame(gameId)
             }
         }
     }
