@@ -22,7 +22,8 @@ sealed class InstallationStrategy {
         override fun install(basePath: File) {
             val executable = File(basePath, path)
             val workingDirectory = File(basePath, workingDir)
-            Environment.startProcess(workingDirectory, executable, arguments, elevated)
+            val future = Environment.startProcess(workingDirectory, executable, arguments, elevated)
+            println("process \"$path\" exited with code ${future.get()}")
         }
     }
 
