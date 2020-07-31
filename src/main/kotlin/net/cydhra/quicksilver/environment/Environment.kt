@@ -21,16 +21,17 @@ object Environment {
         // TODO operating system dependent stuff
 
         val powerShell = PowerShell.openSession()
-            .executeCommandAndChain("\$newProcess = new-object System.Diagnostics.ProcessStartInfo \"${executable.absolutePath}\"")
-            .executeCommandAndChain("\$newProcess.Arguments = \"$arguments\"")
-            .executeCommandAndChain("\$newProcess.WorkingDirectory = \"${workingDirectory.absolutePath}\"")
+            .executeCommandAndChain("\$newProcess = new-object System.Diagnostics.Process")
+            .executeCommandAndChain("\$newProcess.StartInfo.FileName = \"${executable.absolutePath}\"")
+            .executeCommandAndChain("\$newProcess.StartInfo.Arguments = \"$arguments\"")
+            .executeCommandAndChain("\$newProcess.StartInfo.WorkingDirectory = \"${workingDirectory.absolutePath}\"")
 
         if (elevated) {
-            powerShell.executeCommandAndChain("\$newProcess.Verb = \"runas\"")
+            powerShell.executeCommandAndChain("\$newProcess.StartInfo.Verb = \"runas\"")
         }
 
         powerShell
-            .executeCommandAndChain("[System.Diagnostics.Process]::Start(\$newProcess)",
+            .executeCommandAndChain("\$newProcess.Start()",
                 PowerShellResponseHandler { response -> println(response.commandOutput) })
             .close()
 
