@@ -36,10 +36,34 @@ class GamePackSerializer(
         dataOut.writeUTF(json.stringify(GamePackDefinition.serializer(), this.definition))
 
         val zipOutputStream = ZipOutputStream(out).apply { setLevel(9) }
-        this.paths.forEach { file ->
-            zipOutputStream.putNextEntry(ZipEntry(file.name))
-            zipOutputStream.write(file.readBytes())
-            zipOutputStream.closeEntry()
+
+        this.paths.forEach { path ->
+            fun putFile(file: File) {
+                if (!file.isDirectory) {
+                    var entryName = path.name
+                    val relativePath = file.toRelativeString(path)
+                    if (relativePath != "") {
+                        entryName += "/$relativePath"
+                    }
+
+                    zipOutputStream.putNextEntry(ZipEntry(entryName))
+                    file.inputStream().use { it.copyTo(zipOutputStream) }
+                    zipOutputStream.closeEntry()
+                } else {
+                    var entryName = path.name + '/'
+                    val relativePath = file.toRelativeString(path)
+                    if (relativePath != "") {
+                        entryName += "$relativePath/"
+                    }
+
+                    zipOutputStream.putNextEntry(ZipEntry(entryName))
+                    zipOutputStream.closeEntry()
+
+                    file.listFiles()?.forEach { putFile(it) }
+                }
+            }
+
+            putFile(path)
         }
     }
 }
