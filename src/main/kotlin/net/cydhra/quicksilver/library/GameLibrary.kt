@@ -21,12 +21,17 @@ class GameLibrary(val path: String) {
     private val installedGames: HashMap<String, GamePackDefinition> = hashMapOf()
 
     fun initLibrary() {
-        val games = json.parse(String.serializer().list, configFile.readText())
-        installedGames.putAll(games.map { game ->
-            val definitionFile = File(File(libraryDirectory, game), game)
-            val definition = json.parse(GamePackDefinition.serializer(), definitionFile.readText())
-            game to definition
-        })
+        if (configFile.exists()) {
+            val games = json.parse(String.serializer().list, configFile.readText())
+            installedGames.putAll(games.map { game ->
+                val definitionFile = File(File(libraryDirectory, game), game)
+                val definition = json.parse(GamePackDefinition.serializer(), definitionFile.readText())
+                game to definition
+            })
+        } else {
+            configFile.createNewFile()
+            storeState()
+        }
     }
 
     /**
