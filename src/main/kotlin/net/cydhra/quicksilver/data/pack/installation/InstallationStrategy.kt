@@ -17,11 +17,14 @@ sealed class InstallationStrategy {
     ) : InstallationStrategy() {
 
         override fun install(basePath: File) {
+            val executable = File(basePath, path)
+            val workingDirectory = File(basePath, workingDir)
+
             val powerShell = PowerShell.openSession()
                 .executeCommandAndChain("cd ${basePath.absolutePath}")
-                .executeCommandAndChain("\$newProcess = new-object System.Diagnostics.ProcessStartInfo \"$path\"")
+                .executeCommandAndChain("\$newProcess = new-object System.Diagnostics.ProcessStartInfo \"${executable.absolutePath}\"")
                 .executeCommandAndChain("\$newProcess.Arguments = \"$arguments\"")
-                .executeCommandAndChain("\$newProcess.WorkingDirectory = \"${basePath.absolutePath}/$workingDir\"")
+                .executeCommandAndChain("\$newProcess.WorkingDirectory = \"${workingDirectory.absolutePath}\"")
 
             if (elevated) {
                 powerShell.executeCommandAndChain("\$newProcess.Verb = \"runas\"")
