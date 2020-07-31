@@ -24,7 +24,7 @@ class GameLibrary(val path: String) {
         if (configFile.exists()) {
             val games = json.parse(String.serializer().list, configFile.readText())
             installedGames.putAll(games.map { game ->
-                val definitionFile = File(File(libraryDirectory, game), game)
+                val definitionFile = File(File(libraryDirectory, game), "$game.json")
                 val definition = json.parse(GamePackDefinition.serializer(), definitionFile.readText())
                 game to definition
             })
