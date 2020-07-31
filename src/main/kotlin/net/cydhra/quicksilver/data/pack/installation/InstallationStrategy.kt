@@ -8,6 +8,9 @@ import java.io.File
 @Serializable
 sealed class InstallationStrategy {
 
+    /**
+     * An installation step that executes a file, optionally with elevated permissions. Can be used to run installers.
+     */
     @Serializable
     class ExecuteStrategy(
         val elevated: Boolean,
@@ -23,10 +26,26 @@ sealed class InstallationStrategy {
         }
     }
 
+    /**
+     * An installation step that imports a registry file into registry. Can be used to add or alter registry entries.
+     */
     @Serializable
     class RegistryStrategy(val file: String) : InstallationStrategy() {
         override fun install(basePath: File) {
             PowerShell.executeSingleCommand("REG IMPORT $file")
+        }
+    }
+
+    /**
+     * An installation step that deletes a given set of files. Can be used to cleanup installation resources that are no
+     * longer needed after installation
+     */
+    @Serializable
+    class DeleteFilesStrategy(val files: Array<String>) : InstallationStrategy() {
+        override fun install(basePath: File) {
+            this.files.forEach { file ->
+                File(basePath, file).delete()
+            }
         }
     }
 
