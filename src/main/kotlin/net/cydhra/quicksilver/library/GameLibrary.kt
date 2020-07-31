@@ -6,6 +6,7 @@ import kotlinx.serialization.builtins.set
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import net.cydhra.quicksilver.data.pack.GamePackDefinition
+import net.cydhra.quicksilver.environment.Environment
 import java.io.File
 
 class GameLibrary(val path: String) {
@@ -44,7 +45,20 @@ class GameLibrary(val path: String) {
     }
 
     fun startGame(id: String) {
+        val definition = this.installedGames[id] ?: throw IllegalArgumentException("unknown game id")
+        val gameDirectory = File(this.libraryDirectory, definition.info.id)
+        val workingDirectory = File(gameDirectory, definition.execution.workingDirectory)
+        val executable = File(gameDirectory, definition.execution.path)
 
+        definition.execution.prerequisites.forEach { step ->
+            // TODO load execution pre requisites
+        }
+
+        Environment.startProcess(workingDirectory, executable, definition.execution.arguments, false)
+
+        definition.execution.prerequisites.forEach { step ->
+            // TODO unload execution pre requisites
+        }
     }
 
     private fun storeState() {
