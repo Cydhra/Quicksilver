@@ -6,6 +6,7 @@ buildscript {
         log4j_version = '2.13.0'
         ktor_version = '1.3.0'
         jsoup_version = '1.12.2'
+        junit_version = '5.2.0'
     }
 
     repositories {
@@ -46,11 +47,25 @@ dependencies {
 
     // system
     compile group: 'com.profesorfalken', name: 'jPowerShell', version: '3.1.1'
+
+    // testing
+    testCompile group: 'org.assertj', name: 'assertj-core', version: '3.11.1'
+    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junit_version
+    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: junit_version
+    testRuntime group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junit_version
 }
 
 compileKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
+
 compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
 }
