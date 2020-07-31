@@ -1,16 +1,31 @@
 package net.cydhra.quicksilver.library
 
+import kotlinx.serialization.builtins.list
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.builtins.set
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonConfiguration
 import net.cydhra.quicksilver.data.pack.GamePackDefinition
 import java.io.File
 
 class GameLibrary(val path: String) {
 
+    companion object {
+        private val json = Json(JsonConfiguration.Stable)
+    }
+
     private val libraryDirectory = File(path)
+    private val configFile = File(libraryDirectory, ".library")
 
     private val installedGames: HashMap<String, GamePackDefinition> = hashMapOf()
 
     fun initLibrary() {
-
+        val games = json.parse(String.serializer().list, configFile.readText())
+        installedGames.putAll(games.map { game ->
+            val definitionFile = File(File(libraryDirectory, game), game)
+            val definition = json.parse(GamePackDefinition.serializer(), definitionFile.readText())
+            game to definition
+        })
     }
 
     /**
@@ -25,9 +40,19 @@ class GameLibrary(val path: String) {
         }
 
         installedGames[gameDefinition.info.id] = gameDefinition
+        storeState()
     }
 
     fun startGame(id: String) {
 
+    }
+
+    private fun storeState() {
+        configFile.writeText(
+            Json(JsonConfiguration.Stable).stringify(
+                String.serializer().set,
+                this.installedGames.keys
+            )
+        )
     }
 }
