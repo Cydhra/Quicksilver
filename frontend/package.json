@@ -1,0 +1,14 @@
+{
+  "name": "quicksilver-frontend",
+  "version": "0.1.0",
+  "description": "frontend for quicksilver launcher",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^9.1.2"
+  }
+}
