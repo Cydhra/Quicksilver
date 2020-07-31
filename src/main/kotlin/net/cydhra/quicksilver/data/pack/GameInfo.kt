@@ -14,7 +14,7 @@ class GameInfo(
     val studio: String = "",
     val publisher: String = "",
     val release: @Serializable(with = DateSerializer::class) ZonedDateTime = ZonedDateTime.ofInstant(
-        Instant.MIN,
+        Instant.EPOCH,
         ZoneId.of("Europe/London")
     ),
     val version: String = "",
