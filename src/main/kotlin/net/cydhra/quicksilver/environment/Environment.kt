@@ -28,7 +28,12 @@ object Environment {
      *
      * @return a future on the exit code of the process
      */
-    fun startProcess(workingDirectory: File, executable: File, arguments: String, elevated: Boolean): ListenableFuture<Int> {
+    fun startProcess(
+        workingDirectory: File,
+        executable: File,
+        arguments: String,
+        elevated: Boolean
+    ): ListenableFuture<Int> {
         // TODO operating system dependent stuff
 
         return this.threadPool.submit(Callable {
@@ -47,7 +52,13 @@ object Environment {
                 .executeCommandAndChain("\$newProcess.Start()",
                     PowerShellResponseHandler { response -> println(response.commandOutput) })
                 .executeCommandAndChain("\$newProcess.WaitForExit()",
-                    PowerShellResponseHandler { response -> exitCode = response.commandOutput.toInt() })
+                    PowerShellResponseHandler { response ->
+                        exitCode = try {
+                            response.commandOutput.toInt()
+                        } catch (e: NumberFormatException) {
+                            0
+                        }
+                    })
                 .close()
 
             return@Callable exitCode
