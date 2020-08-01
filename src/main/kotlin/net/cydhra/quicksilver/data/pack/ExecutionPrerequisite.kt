@@ -13,6 +13,7 @@ sealed class ExecutionPrerequisite {
      *
      * @param imagePath relative path to the disk image
      */
+    @Serializable
     class MountIsoPrerequisite(val imagePath: String) : ExecutionPrerequisite() {
 
         override fun enable(basePath: File) {
