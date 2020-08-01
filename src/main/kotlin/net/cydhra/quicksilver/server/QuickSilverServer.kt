@@ -24,6 +24,5 @@ fun Application.main() {
 
         get("library/list", {})
         get("library/add", {})
-        get("library/start", {})
     }
 }
