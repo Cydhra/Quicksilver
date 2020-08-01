@@ -1,4 +1,4 @@
-package net.cydhra.quicksilver.data.pack.installation
+package net.cydhra.quicksilver.data.pack
 
 import com.profesorfalken.jpowershell.PowerShell
 import kotlinx.serialization.Serializable
