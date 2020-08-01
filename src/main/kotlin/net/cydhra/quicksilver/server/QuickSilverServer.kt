@@ -17,7 +17,7 @@ fun Application.main() {
         json()
     }
     install(Routing) {
-        get("game/install", {})
+        get("game/install", installGameInterceptor)
         get("game/start", startGameInterceptor)
         get("game/list", {})
         get("game/info", {})

@@ -136,4 +136,17 @@ object QuicksilverLauncher {
             Json(JsonConfiguration.Stable).stringify(Configuration.serializer(), this.configuration)
         )
     }
+
+    /**
+     * Install a game from a game pack file located at the given url. It will be installed into the specified library.
+     * If no library is specified, the default library (the first in the config file) is used.
+     *
+     * @param url where the game pack file is located
+     * @param libraryIndex the index of the library into which the file is installed
+     */
+    fun installGame(url: String, libraryIndex: Int?) {
+        val gameLibrary = if (libraryIndex != null) {
+            this.libraries[libraryIndex]
+        } else this.libraries.first()
+    }
 }
