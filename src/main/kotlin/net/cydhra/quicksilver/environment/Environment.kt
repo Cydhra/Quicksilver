@@ -1,11 +1,12 @@
 package net.cydhra.quicksilver.environment
 
+import com.google.common.util.concurrent.ListenableFuture
+import com.google.common.util.concurrent.MoreExecutors
 import com.profesorfalken.jpowershell.PowerShell
 import com.profesorfalken.jpowershell.PowerShellResponseHandler
 import java.io.File
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
-import java.util.concurrent.Future
 
 /**
  * A wrapper for system-dependent calls
@@ -15,7 +16,7 @@ object Environment {
     /**
      * A cached thread pool to run system tasks and wait for their completion
      */
-    private val threadPool = Executors.newCachedThreadPool()
+    private val threadPool = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())
 
     /**
      * Start a process using means of the operating system.
@@ -27,7 +28,7 @@ object Environment {
      *
      * @return a future on the exit code of the process
      */
-    fun startProcess(workingDirectory: File, executable: File, arguments: String, elevated: Boolean): Future<Int> {
+    fun startProcess(workingDirectory: File, executable: File, arguments: String, elevated: Boolean): ListenableFuture<Int> {
         // TODO operating system dependent stuff
 
         return this.threadPool.submit(Callable {
