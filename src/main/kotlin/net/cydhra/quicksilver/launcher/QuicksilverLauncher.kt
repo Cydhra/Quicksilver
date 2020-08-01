@@ -62,7 +62,7 @@ object QuicksilverLauncher {
         // execute all prerequisites
         // TODO this should be added to a future as well
         definition.execution.prerequisites.forEach { step ->
-            // TODO load execution pre requisites
+            step.enable(gameDirectory)
         }
 
         // start the game and retrieve a future that waits for it to end
@@ -73,7 +73,7 @@ object QuicksilverLauncher {
         Futures.addCallback(gameProcessFuture, object : FutureCallback<Any> {
             override fun onSuccess(result: Any?) {
                 definition.execution.prerequisites.forEach { step ->
-                    // TODO unload execution pre requisites
+                    step.disable(gameDirectory)
                 }
 
                 this@QuicksilverLauncher.finishRunningGame(gameId)
