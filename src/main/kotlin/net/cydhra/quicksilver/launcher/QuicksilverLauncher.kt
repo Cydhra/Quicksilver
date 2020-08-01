@@ -121,7 +121,7 @@ object QuicksilverLauncher {
             val library = GameLibrary(libPath)
             library.initLibrary()
             this.libraries.add(library)
-            println("loaded library at \"$libPath\"")
+            logger.info("loaded library at \"$libPath\"")
         }
     }
 
