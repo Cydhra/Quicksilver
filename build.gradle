@@ -39,9 +39,6 @@ dependencies {
     implementation group: 'io.ktor', name: 'ktor-server-netty', version: ktor_version
     implementation group: 'io.ktor', name: 'ktor-serialization', version: ktor_version
 
-    // html
-    implementation group: 'org.jsoup', name: 'jsoup', version: jsoup_version
-
     // logging
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4j_version
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4j_version
@@ -49,6 +46,9 @@ dependencies {
 
     // system
     compile group: 'com.github.Cydhra', name: 'jPowerShell', version: 'master'
+
+    // utility
+    compile group: 'com.google.guava', name: 'guava', version: '29.0-jre'
 
     // testing
     testCompile group: 'org.assertj', name: 'assertj-core', version: '3.11.1'
