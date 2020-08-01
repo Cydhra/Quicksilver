@@ -8,6 +8,7 @@ import net.cydhra.quicksilver.environment.Environment
 import net.cydhra.quicksilver.library.GameLibrary
 import org.apache.logging.log4j.LogManager
 import java.io.File
+import java.net.URL
 import java.util.concurrent.Executors
 
 object QuicksilverLauncher {
@@ -148,5 +149,7 @@ object QuicksilverLauncher {
         val gameLibrary = if (libraryIndex != null) {
             this.libraries[libraryIndex]
         } else this.libraries.first()
+
+        gameLibrary.installGamePack(File(URL(url).toURI()))
     }
 }
