@@ -17,4 +17,5 @@ val installGameInterceptor: PipelineInterceptor<Unit, ApplicationCall> = interce
     }
 
     QuicksilverLauncher.installGame(url, library)
+    call.respond(HttpStatusCode.OK)
 }

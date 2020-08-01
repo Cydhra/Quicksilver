@@ -13,7 +13,8 @@ val startGameInterceptor: PipelineInterceptor<Unit, ApplicationCall> = intercept
     if (gameId == null) {
         call.respond(HttpStatusCode.BadRequest)
         return@interceptor
-    } else {
-        QuicksilverLauncher.runGame(gameId)
     }
+
+    QuicksilverLauncher.runGame(gameId)
+    call.respond(HttpStatusCode.OK)
 }
