@@ -22,7 +22,12 @@ sealed class InstallationStrategy {
         override fun install(basePath: File) {
             val executable = File(basePath, path)
             val workingDirectory = File(basePath, workingDir)
-            val future = Environment.startProcess(workingDirectory, executable, arguments, elevated)
+            val future = if (elevated) {
+                Environment.startProcessElevated(workingDirectory, executable, arguments)
+            } else {
+                Environment.startProcess(workingDirectory, executable, arguments)
+            }
+
             println("process \"$path\" exited with code ${future.get()}")
         }
     }

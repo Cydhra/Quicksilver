@@ -67,16 +67,16 @@ object QuicksilverLauncher {
 
         // start the game and retrieve a future that waits for it to end
         val gameProcessFuture =
-            Environment.startProcess(workingDirectory, executable, definition.execution.arguments, false)
+            Environment.startProcess(workingDirectory, executable, definition.execution.arguments)
 
         // add cleanup callback to the future
-        Futures.addCallback(gameProcessFuture, object : FutureCallback<Int> {
-            override fun onSuccess(result: Int?) {
+        Futures.addCallback(gameProcessFuture, object : FutureCallback<Any> {
+            override fun onSuccess(result: Any?) {
                 definition.execution.prerequisites.forEach { step ->
                     // TODO unload execution pre requisites
                 }
 
-                this@QuicksilverLauncher.finishRunningGame(gameId, result!!)
+                this@QuicksilverLauncher.finishRunningGame(gameId)
             }
 
             override fun onFailure(t: Throwable) {
@@ -88,10 +88,10 @@ object QuicksilverLauncher {
         runningGames.add(RunningGame(definition, gameProcessFuture))
     }
 
-    private fun finishRunningGame(gameId: String, exitCode: Int) {
+    private fun finishRunningGame(gameId: String) {
         synchronized(this.runningGames) {
             this.runningGames.removeIf { it.game.info.id == gameId }
-            logger.info("game \"$gameId\" stopped with exit code $exitCode")
+            logger.info("game \"$gameId\" exited")
         }
     }
 

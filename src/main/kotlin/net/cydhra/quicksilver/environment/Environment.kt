@@ -5,7 +5,6 @@ import com.google.common.util.concurrent.MoreExecutors
 import com.profesorfalken.jpowershell.PowerShell
 import com.profesorfalken.jpowershell.PowerShellResponseHandler
 import java.io.File
-import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 
 /**
@@ -18,50 +17,57 @@ object Environment {
      */
     private val threadPool = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())
 
+    // TODO this is a dirty hack that is used to elevate execution of a process. However, we cannot wait until the
+    //  process exits, because the powershell session is ended before that
     /**
-     * Start a process using means of the operating system.
+     * Start a process using means of the operating system using elevated permissions.
      *
      * @param workingDirectory the working directory of the process
      * @param executable the executable to start a process of
      * @param arguments programm arguments
-     * @param elevated whether the process should be started with elevated permissions
      *
-     * @return a future on the exit code of the process
+     * @return a future on the start of the process. The end of process cannot be detected
      */
-    fun startProcess(
+    fun startProcessElevated(
         workingDirectory: File,
         executable: File,
-        arguments: String,
-        elevated: Boolean
-    ): ListenableFuture<Int> {
+        arguments: String
+    ): ListenableFuture<*> {
         // TODO operating system dependent stuff
 
-        return this.threadPool.submit(Callable {
-            val powerShell = PowerShell.openSession()
+        return this.threadPool.submit {
+            PowerShell.openSession()
                 .executeCommandAndChain("\$newProcess = new-object System.Diagnostics.Process")
                 .executeCommandAndChain("\$newProcess.StartInfo.FileName = \"${executable.absolutePath}\"")
                 .executeCommandAndChain("\$newProcess.StartInfo.Arguments = \"$arguments\"")
                 .executeCommandAndChain("\$newProcess.StartInfo.WorkingDirectory = \"${workingDirectory.absolutePath}\"")
-
-            if (elevated) {
-                powerShell.executeCommandAndChain("\$newProcess.StartInfo.Verb = \"runas\"")
-            }
-
-            var exitCode = 0
-            powerShell
+                .executeCommandAndChain("\$newProcess.StartInfo.Verb = \"runas\"")
                 .executeCommandAndChain("\$newProcess.Start()",
                     PowerShellResponseHandler { response -> println(response.commandOutput) })
-                .executeCommandAndChain("\$newProcess.WaitForExit()",
-                    PowerShellResponseHandler { response ->
-                        exitCode = try {
-                            response.commandOutput.toInt()
-                        } catch (e: NumberFormatException) {
-                            -1337
-                        }
-                    })
                 .close()
+        }
+    }
 
-            return@Callable exitCode
-        })
+    /**
+     * Start a process using means of the operating system and generate a future that waits for the process to exit
+     *
+     * @param workingDirectory the working directory of the process
+     * @param executable the executable to start a process of
+     * @param arguments programm arguments
+     *
+     * @return a future that finishes, when the process exits
+     */
+    fun startProcess(
+        workingDirectory: File,
+        executable: File,
+        arguments: String
+    ): ListenableFuture<*> {
+        return this.threadPool.submit {
+            ProcessBuilder()
+                .directory(workingDirectory)
+                .command(executable.absolutePath, *arguments.split(" ").toTypedArray())
+                .start()
+                .waitFor()
+        }
     }
 }
