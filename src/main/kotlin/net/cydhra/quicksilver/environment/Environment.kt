@@ -56,7 +56,7 @@ object Environment {
                         exitCode = try {
                             response.commandOutput.toInt()
                         } catch (e: NumberFormatException) {
-                            0
+                            -1337
                         }
                     })
                 .close()
