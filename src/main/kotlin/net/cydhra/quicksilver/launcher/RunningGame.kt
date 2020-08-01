@@ -9,4 +9,4 @@ import java.util.concurrent.Future
  * @param game the definition of the game that is running
  * @param future a future that waits for the game to end. It returns the game's exit code
  */
-class RunningGame(game: GamePackDefinition, future: Future<Int>)
+class RunningGame(val game: GamePackDefinition, val future: Future<Int>)

@@ -1,11 +1,18 @@
 package net.cydhra.quicksilver.launcher
 
+import com.google.common.util.concurrent.FutureCallback
+import com.google.common.util.concurrent.Futures
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
+import net.cydhra.quicksilver.environment.Environment
 import net.cydhra.quicksilver.library.GameLibrary
+import org.apache.logging.log4j.LogManager
 import java.io.File
+import java.util.concurrent.Executors
 
 object QuicksilverLauncher {
+
+    private val logger = LogManager.getLogger()
 
     /**
      * Quicksilver configuration file
@@ -27,6 +34,11 @@ object QuicksilverLauncher {
      */
     private val runningGames = mutableListOf<RunningGame>()
 
+    /**
+     * An executor for callbacks on futures
+     */
+    private val executor = Executors.newCachedThreadPool()
+
     init {
         this.loadConfig()
         this.loadLibraries()
@@ -38,7 +50,48 @@ object QuicksilverLauncher {
      * @param gameId the unique identifier for the game
      */
     fun runGame(gameId: String) {
-        TODO("not implemented")
+        val executingLibrary = this.libraries
+            .firstOrNull { it.containsGame(gameId) }
+            ?: throw IllegalStateException("a game with id \"$gameId\" is not installed")
+
+        val (gameDirectory, definition) = executingLibrary.loadGameDefinition(gameId)
+        val workingDirectory = File(gameDirectory, definition.execution.workingDirectory)
+        val executable = File(gameDirectory, definition.execution.path)
+
+        // execute all prerequisites
+        // TODO this should be added to a future as well
+        definition.execution.prerequisites.forEach { step ->
+            // TODO load execution pre requisites
+        }
+
+        // start the game and retrieve a future that waits for it to end
+        val gameProcessFuture =
+            Environment.startProcess(workingDirectory, executable, definition.execution.arguments, false)
+
+        // add cleanup callback to the future
+        Futures.addCallback(gameProcessFuture, object : FutureCallback<Int> {
+            override fun onSuccess(result: Int?) {
+                definition.execution.prerequisites.forEach { step ->
+                    // TODO unload execution pre requisites
+                }
+
+                this@QuicksilverLauncher.finishRunningGame(gameId, result!!)
+            }
+
+            override fun onFailure(t: Throwable) {
+                logger.error("error while executing game $gameId", t)
+            }
+        }, executor)
+
+        // add the running game future to the list
+        runningGames.add(RunningGame(definition, gameProcessFuture))
+    }
+
+    private fun finishRunningGame(gameId: String, exitCode: Int) {
+        synchronized(this.runningGames) {
+            this.runningGames.removeIf { it.game.info.id == gameId }
+            logger.info("game \"$gameId\" stopped with exit code $exitCode")
+        }
     }
 
     /**
