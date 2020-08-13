@@ -9,7 +9,3 @@ build
 # project
 run/*
 !run/.gitkeep
-
-# electron
-frontend/node_modules
-**/package-lock.json
