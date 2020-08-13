@@ -38,6 +38,7 @@ dependencies {
     implementation group: 'io.ktor', name: 'ktor-server-core', version: ktor_version
     implementation group: 'io.ktor', name: 'ktor-server-netty', version: ktor_version
     implementation group: 'io.ktor', name: 'ktor-serialization', version: ktor_version
+    implementation group: 'io.ktor', name: 'ktor-websockets', version: ktor_version
 
     // logging
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4j_version
