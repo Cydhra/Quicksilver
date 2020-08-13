@@ -10,7 +10,6 @@ import io.ktor.routing.Routing
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.serialization.json
-import io.ktor.websocket.WebSockets
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 
@@ -35,4 +34,17 @@ fun Application.main() {
         get("library/list", {})
         get("library/add", {})
     }
+}
+
+//private fun handleFrame(frame: Frame.Text) {
+//    val frameContent = String(frame.data)
+//}
+
+fun main() {
+//    val file = File("C:\\Users\\Johannes\\IdeaProjects\\Quicksilver\\run\\railroad\\poptop.railroad2.1998.json")
+//    val def = Json(JsonConfiguration.Stable).parse(GamePackDefinition.serializer(), file.readText())
+//    val out = File(file.parentFile.parentFile, "railroad2.game").outputStream()
+//
+//    GamePackSerializer(def, arrayOf(File(file.parentFile, "RailRoad Tycoon II"), File(file.parentFile, "railroad.iso"))).pack(out)
+//    out.close()
 }
