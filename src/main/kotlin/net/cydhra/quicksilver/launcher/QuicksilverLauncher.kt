@@ -159,4 +159,11 @@ object QuicksilverLauncher {
             .map { it.listGames() }
             .flatten()
     }
+
+    /**
+     * Get the game info of the specified game id of any library
+     */
+    fun getGameInfo(gameId: String): GameInfo? {
+        return this.libraries.mapNotNull { it.getGameInfo(gameId) }.firstOrNull()
+    }
 }

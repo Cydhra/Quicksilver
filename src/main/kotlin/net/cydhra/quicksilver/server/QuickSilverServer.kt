@@ -29,7 +29,7 @@ fun Application.main() {
         post("game/install", installGameInterceptor)
         post("game/start", startGameInterceptor)
         get("game/list", listGameInterceptor)
-        get("game/info", {})
+        get("game/info", gameInfoInterceptor)
 
         get("library/list", {})
         get("library/add", {})

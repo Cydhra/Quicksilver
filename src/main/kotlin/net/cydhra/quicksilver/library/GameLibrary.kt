@@ -96,4 +96,11 @@ class GameLibrary(val path: String) {
     fun listGames(): List<GameInfo> {
         return this.gameDetails.values.toList()
     }
+
+    /**
+     * Get the [GameInfo] instance of a specified game or null, if that game is not present in this library
+     */
+    fun getGameInfo(gameId: String): GameInfo? {
+        return this.gameDetails[gameId]
+    }
 }
