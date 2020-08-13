@@ -7,7 +7,13 @@ import io.ktor.features.ContentNegotiation
 import io.ktor.features.DefaultHeaders
 import io.ktor.routing.Routing
 import io.ktor.routing.get
+import io.ktor.routing.post
 import io.ktor.serialization.json
+import io.ktor.websocket.WebSockets
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonConfiguration
+
+val serverJsonSerializer = Json(JsonConfiguration.Stable)
 
 @Suppress("unused")
 fun Application.main() {
@@ -17,9 +23,9 @@ fun Application.main() {
         json()
     }
     install(Routing) {
-        get("game/install", installGameInterceptor)
-        get("game/start", startGameInterceptor)
-        get("game/list", {})
+        post("game/install", installGameInterceptor)
+        post("game/start", startGameInterceptor)
+        get("game/list", listGameInterceptor)
         get("game/info", {})
 
         get("library/list", {})

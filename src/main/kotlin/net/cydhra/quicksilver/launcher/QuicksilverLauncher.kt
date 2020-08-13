@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.FutureCallback
 import com.google.common.util.concurrent.Futures
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
+import net.cydhra.quicksilver.data.pack.GameInfo
 import net.cydhra.quicksilver.environment.Environment
 import net.cydhra.quicksilver.library.GameLibrary
 import org.apache.logging.log4j.LogManager
@@ -151,5 +152,11 @@ object QuicksilverLauncher {
         } else this.libraries.first()
 
         gameLibrary.installGamePack(File(URL(url).toURI()))
+    }
+
+    fun listGames(): List<GameInfo> {
+        return this.libraries
+            .map { it.listGames() }
+            .flatten()
     }
 }
