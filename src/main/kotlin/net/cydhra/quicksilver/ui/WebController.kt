@@ -104,7 +104,7 @@ class WebController(cursorManager: CursorAdapter) {
     /**
      * Render the current image using OpenGL
      */
-    fun render() {
+    fun draw() {
         if (glTexture == -1) {
             createGLTexture()
         }

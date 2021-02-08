@@ -181,13 +181,14 @@ object UIController {
             // Poll events to keep the window responsive
             glfwPollEvents()
 
-            // Make sure to update the window
+            // Render the web view
             webController.update()
 
             // Clear the color and depth buffer and then draw
             glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
 
-            webController.render()
+            // draw the rendered image onto the view
+            webController.draw()
 
             glfwSwapBuffers(glfwWindowHandle)
             // TODO poll external events
