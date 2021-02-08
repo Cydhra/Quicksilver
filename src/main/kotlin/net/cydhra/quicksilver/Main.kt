@@ -1,0 +1,13 @@
+package net.cydhra.quicksilver
+
+import java.io.File
+
+fun main() {
+    // find path for natives:
+    val nativesDir = System.getProperty("java.library.path")?.let { File(it).toPath() } ?: File(".").toPath()
+
+    // install application
+    val installer = Installer(nativesDir)
+    installer.installApplication()
+    installer.loadApplication()
+}
