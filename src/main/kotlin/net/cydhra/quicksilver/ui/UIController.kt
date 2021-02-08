@@ -171,7 +171,7 @@ object UIController {
         }
 
         glEnable(GL_MULTISAMPLE)
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f)
+        glClearColor(.2f, .2f, .2f, 1.0f)
 
         // Load a local test file
         webController.loadURL("file:///test.html")
