@@ -130,17 +130,9 @@ test {
 task extractNatives(type: Copy) {
     configurations.natives.each { file ->
         from(zipTree(file)) {
-            if (ultralightOsIdentifier().startsWith("linux")) {
-                include "*.so"
-            }
-            else if (ultralightOsIdentifier().startsWith("win")) {
-                include "*.dll"
-            }
-            else {
-                include "*.dylib"
-            }
+            include "**"
         }
-        into 'lib/native'
+        into 'run/'
     }
 }
 
@@ -153,7 +145,4 @@ run {
     dependsOn extractNatives
 
     workingDir file("$projectDir/run")
-    jvmArgs = [
-            '-Djava.library.path=../lib/native',
-    ]
 }
