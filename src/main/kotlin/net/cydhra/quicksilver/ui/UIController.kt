@@ -145,18 +145,6 @@ object UIController {
             // Update the size
             updateSize(glfwWindowHandle, sizeBuffer[0], sizeBuffer[1])
 
-            /*
-             * Following snippet disabled due to GLFW bug, glfwGetWindowContentScale returns invalid values!
-             *
-             * See https://github.com/glfw/glfw/issues/1811.
-             */
-            // Update scale for the first time
-            // FloatBuffer scaleBuffer = stack.callocFloat(2);
-
-            // Retrieve the scale into the float buffer
-            // glfwGetWindowContentScale(window,
-            //        (FloatBuffer) scaleBuffer.slice().position(0), (FloatBuffer) scaleBuffer.slice().position(1));
-
             // Retrieve framebuffer size for scale calculation
             val framebufferSizeBuffer = stack.callocInt(2)
 
@@ -183,7 +171,7 @@ object UIController {
         }
 
         glEnable(GL_MULTISAMPLE)
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f)
 
         // Load a local test file
         webController.loadURL("file:///test.html")
@@ -202,7 +190,6 @@ object UIController {
             webController.render()
 
             glfwSwapBuffers(glfwWindowHandle)
-
             // TODO poll external events
         }
 
