@@ -1,3 +1,5 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
 buildscript {
     ext {
         kotlinx_serialization_version = '0.20.0'
@@ -16,6 +18,7 @@ buildscript {
     dependencies {
         classpath group: 'org.jetbrains.kotlin', name: 'kotlin-gradle-plugin', version: kotlin_version
         classpath group: 'org.jetbrains.kotlin', name: 'kotlin-serialization', version: kotlin_version
+        classpath group: 'com.github.jengelman.gradle.plugins', name: 'shadow', version: '6.0.0'
     }
 }
 
@@ -24,10 +27,45 @@ version '1.0-SNAPSHOT'
 
 apply plugin: 'kotlin'
 apply plugin: 'kotlinx-serialization'
+apply plugin: 'application'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+mainClassName = 'io.ktor.server.netty.EngineMain'
 
 repositories {
     jcenter()
     maven { url 'https://jitpack.io' }
+    flatDir { dirs 'lib' }
+}
+
+def ultralightOsIdentifier = {
+    def bitName = (System.getProperty("os.arch", "?").contains("64") ||
+            System.getProperty("sun.arch.data.model", "?").contains("64")) ? "64" : "32"
+
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        return "win" + bitName
+    } else if (Os.isFamily(Os.FAMILY_UNIX)) {
+        return "linux" + bitName
+    } else {
+        throw new UnsupportedOperationException("This OS is not supported")
+    }
+}
+
+def lwjglClassifier = {
+    if(Os.isFamily(Os.FAMILY_WINDOWS)) {
+        return "natives-windows"
+    } else if(Os.isFamily(Os.FAMILY_MAC)) {
+        return "natives-macos"
+    } else if(Os.isFamily(Os.FAMILY_UNIX)) {
+        return "natives-linux"
+    } else {
+        throw new UnsupportedOperationException("This OS is not supported")
+    }
+}
+
+configurations {
+    natives
+    compile.extendsFrom(natives)
 }
 
 dependencies {
@@ -45,11 +83,25 @@ dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4j_version
     implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: log4j_version
 
+    // ui
+    implementation group: 'com.labymedia', name: 'ultralight-java-base', version: '0.3.5'
+    implementation group: 'com.labymedia', name: 'ultralight-java-databind', version: '0.3.5'
+    natives group: 'ht.ultralig', name: 'ultralight-sdk', version: '1.2.1', classifier: ultralightOsIdentifier()
+
+    implementation group: 'org.lwjgl', name: 'lwjgl', version: '3.2.2'
+    runtimeOnly group: 'org.lwjgl', name: 'lwjgl', version: '3.2.2', classifier: lwjglClassifier()
+
+    implementation group: 'org.lwjgl', name: 'lwjgl-opengl', version: '3.2.2'
+    runtimeOnly group: 'org.lwjgl', name: 'lwjgl-opengl', version: '3.2.2', classifier: lwjglClassifier()
+
+    implementation group: 'org.lwjgl', name: 'lwjgl-glfw', version: '3.2.2'
+    runtimeOnly group: 'org.lwjgl', name: 'lwjgl-glfw', version: '3.2.2', classifier: lwjglClassifier()
+
     // system
-    compile group: 'com.github.Cydhra', name: 'jPowerShell', version: 'master'
+    implementation group: 'com.github.Cydhra', name: 'jPowerShell', version: 'master'
 
     // utility
-    compile group: 'com.google.guava', name: 'guava', version: '29.0-jre'
+    implementation group: 'com.google.guava', name: 'guava', version: '29.0-jre'
 
     // testing
     testCompile group: 'org.assertj', name: 'assertj-core', version: '3.11.1'
@@ -71,4 +123,37 @@ test {
     testLogging {
         events "passed", "skipped", "failed"
     }
+}
+
+// Extract the native libraries that it needs at runtime into a directory that is then made available using JVM
+// arguments
+task extractNatives(type: Copy) {
+    configurations.natives.each { file ->
+        from(zipTree(file)) {
+            if (ultralightOsIdentifier().startsWith("linux")) {
+                include "*.so"
+            }
+            else if (ultralightOsIdentifier().startsWith("win")) {
+                include "*.dll"
+            }
+            else {
+                include "*.dylib"
+            }
+        }
+        into 'lib/native'
+    }
+}
+
+application {
+    mainClassName = 'net.cydhra.quicksilver.server.QuickSilverServerKt'
+}
+
+run {
+    // ensure that natives are present
+    dependsOn extractNatives
+
+    workingDir file("$projectDir/run")
+    jvmArgs = [
+            '-Djava.library.path=../lib/native',
+    ]
 }

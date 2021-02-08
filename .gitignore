@@ -4,8 +4,10 @@
 
 # gradle
 build
+out
 .gradle
 
 # project
 run/*
 !run/.gitkeep
+lib/native
