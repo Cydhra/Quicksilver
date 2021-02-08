@@ -27,7 +27,10 @@ import com.labymedia.ultralight.config.UltralightConfig
 import net.cydhra.quicksilver.ui.input.ClipboardAdapter
 import net.cydhra.quicksilver.ui.input.CursorAdapter
 import net.cydhra.quicksilver.ui.input.InputAdapter
+import net.cydhra.quicksilver.ui.listener.ExampleLoadListener
 import net.cydhra.quicksilver.ui.listener.ExampleViewListener
+import net.cydhra.quicksilver.ui.util.ExampleFileSystem
+import net.cydhra.quicksilver.ui.util.ExampleLogger
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL12
 import java.nio.ByteBuffer
@@ -40,8 +43,8 @@ class WebController(cursorManager: CursorAdapter) {
     private val renderer: UltralightRenderer
     private val view: UltralightView
     private val viewListener: ExampleViewListener
-//    private val loadListener: ExampleLoadListener
-    private val inputAdapter: InputAdapter
+    private val loadListener: ExampleLoadListener
+    val inputAdapter: InputAdapter
     private var glTexture: Int
 
     /**
@@ -57,16 +60,16 @@ class WebController(cursorManager: CursorAdapter) {
                 .deviceScale(1.0)
         )
         platform.usePlatformFontLoader()
-//        platform.setFileSystem(ExampleFileSystem())
-//        platform.setLogger(ExampleLogger())
+        platform.setFileSystem(ExampleFileSystem())
+        platform.setLogger(ExampleLogger())
         platform.setClipboard(ClipboardAdapter())
         renderer = UltralightRenderer.create()
         renderer.logMemoryUsage()
         view = renderer.createView(300, 300, true)
         viewListener = ExampleViewListener(cursorManager)
         view.setViewListener(viewListener)
-//        loadListener = ExampleLoadListener(view)
-//        view.setLoadListener(loadListener)
+        loadListener = ExampleLoadListener(view)
+        view.setLoadListener(loadListener)
         glTexture = -1
         inputAdapter = InputAdapter(view)
     }

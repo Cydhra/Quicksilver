@@ -90,7 +90,7 @@ class ExampleLoadListener(private val view: UltralightView) : UltralightLoadList
     ) {
         System.err.println(
             frameName(frameId, isMainFrame, url) +
-                    "Failed to load " + errorDomain + ", " + errorCode + "(" + description + ")"
+                    "Failed to load " + errorDomain + ", " + errorCode + " (" + description + ")"
         )
     }
 

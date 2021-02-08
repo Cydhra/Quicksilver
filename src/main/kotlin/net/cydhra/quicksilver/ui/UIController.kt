@@ -5,11 +5,11 @@ import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL13.GL_MULTISAMPLE
+import org.lwjgl.system.Callback
 import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil
 import java.nio.IntBuffer
 import java.util.concurrent.Executors
-
 
 object UIController {
 
@@ -35,16 +35,28 @@ object UIController {
     private fun doSetupWindow() {
         glfwSetErrorCallback(this::onGLFWError);
 
-        if(!glfwInit()) {
+        if (!glfwInit()) {
             throw IllegalStateException("Failed to initialize GLFW");
         }
 
         glfwWindowHandle = glfwCreateWindow(1280, 720, "Quicksilver", MemoryUtil.NULL, MemoryUtil.NULL);
-        if(glfwWindowHandle == MemoryUtil.NULL) {
+        if (glfwWindowHandle == MemoryUtil.NULL) {
             throw IllegalStateException("Failed to create a GLFW window");
         }
 
+        // Make sure to update the framebuffer size when resizing
+        glfwSetFramebufferSizeCallback(glfwWindowHandle, this::updateSize);
+
         webController = WebController(CursorAdapter(glfwWindowHandle))
+
+        // Register all the GLFW callbacks required by this application
+        glfwSetWindowContentScaleCallback(glfwWindowHandle, webController.inputAdapter::windowContentScaleCallback);
+        glfwSetKeyCallback(glfwWindowHandle, webController.inputAdapter::keyCallback)
+        glfwSetCharCallback(glfwWindowHandle, webController.inputAdapter::charCallback)
+        glfwSetCursorPosCallback(glfwWindowHandle, webController.inputAdapter::cursorPosCallback)
+        glfwSetMouseButtonCallback(glfwWindowHandle, webController.inputAdapter::mouseButtonCallback)
+        glfwSetScrollCallback(glfwWindowHandle, webController.inputAdapter::scrollCallback)
+        glfwSetWindowFocusCallback(glfwWindowHandle, webController.inputAdapter::focusCallback)
 
         centerWindow()
         drawLoop()
@@ -112,11 +124,69 @@ object UIController {
 
         // setup GL
         GL.createCapabilities();
+
+        // Manually update focus for the first time
+        // Manually update focus for the first time
+        webController.inputAdapter.focusCallback(
+            glfwWindowHandle,
+            glfwGetWindowAttrib(glfwWindowHandle, GLFW_FOCUSED) != 0
+        )
+
+        MemoryStack.stackPush().use { stack ->
+            // Update window size for the first time
+            val sizeBuffer = stack.callocInt(2)
+
+            // Retrieve the size into the int buffer
+            glfwGetWindowSize(
+                glfwWindowHandle,
+                sizeBuffer.slice().position(0) as IntBuffer, sizeBuffer.slice().position(1) as IntBuffer
+            )
+
+            // Update the size
+            updateSize(glfwWindowHandle, sizeBuffer[0], sizeBuffer[1])
+
+            /*
+             * Following snippet disabled due to GLFW bug, glfwGetWindowContentScale returns invalid values!
+             *
+             * See https://github.com/glfw/glfw/issues/1811.
+             */
+            // Update scale for the first time
+            // FloatBuffer scaleBuffer = stack.callocFloat(2);
+
+            // Retrieve the scale into the float buffer
+            // glfwGetWindowContentScale(window,
+            //        (FloatBuffer) scaleBuffer.slice().position(0), (FloatBuffer) scaleBuffer.slice().position(1));
+
+            // Retrieve framebuffer size for scale calculation
+            val framebufferSizeBuffer = stack.callocInt(2)
+
+            // Retrieve the size into the int buffer
+            glfwGetFramebufferSize(
+                glfwWindowHandle,
+                framebufferSizeBuffer.slice().position(0) as IntBuffer, sizeBuffer.slice().position(1) as IntBuffer
+            )
+
+            // Calculate scale
+            var xScale = framebufferSizeBuffer[0].toFloat() / sizeBuffer[0].toFloat()
+            var yScale = framebufferSizeBuffer[1].toFloat() / sizeBuffer[1].toFloat()
+
+            // Fix up scale in case it gets corrupted... somehow
+            if (xScale == 0.0f) {
+                xScale = 1.0f
+            }
+            if (yScale == 0.0f) {
+                yScale = 1.0f
+            }
+
+            // Update the scale
+            webController.inputAdapter.windowContentScaleCallback(glfwWindowHandle, xScale, yScale)
+        }
+
         glEnable(GL_MULTISAMPLE)
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
 
         // Load a local test file
-        webController.loadURL("https://google.com")
+        webController.loadURL("file:///test.html")
 
         // Keep running until a window close is requested
         while (!glfwWindowShouldClose(glfwWindowHandle)) {
@@ -141,10 +211,22 @@ object UIController {
     }
 
     /**
+     * Adjusts the viewport size to the given size.
+     *
+     * @param window The window the viewport has changed on
+     * @param width  The new width of the viewport
+     * @param height The new height of the viewport
+     */
+    private fun updateSize(window: Long, width: Int, height: Int) {
+        glViewport(0, 0, width, height)
+        webController.resize(width, height)
+    }
+
+    /**
      * Cleanup GLFW resources and close window
      */
     private fun doStop() {
-        if(glfwWindowHandle != MemoryUtil.NULL) {
+        if (glfwWindowHandle != MemoryUtil.NULL) {
             glfwDestroyWindow(glfwWindowHandle);
         }
 
@@ -161,5 +243,31 @@ object UIController {
     private fun onGLFWError(error: Int, message: Long) {
         val strMessage = MemoryUtil.memUTF8(message)
         System.err.println("[GLFW] Error($error): $strMessage")
+    }
+
+    /**
+     * Sets a GLFW callback and frees the old callback if it exists.
+     *
+     * @param setter   The function to use for setting the new callback
+     * @param newValue The new callback
+     * @param <T>      The type of the new callback
+     * @param <C>      The type of the old callback
+    </C></T> */
+    private fun <T, C : Callback?> setCallback(setter: (T) -> C, newValue: T) {
+        val oldValue: C = setter(newValue)
+        oldValue?.free()
+    }
+
+    /**
+     * Sets a GLFW callback and frees the old callback if it exists.
+     *
+     * @param setter   The function to use for setting the new callback
+     * @param newValue The new callback
+     * @param <T>      The type of the new callback
+     * @param <C>      The type of the old callback
+    </C></T> */
+    private fun <T, C : Callback?> setCallback(setter: (Long, T) -> C, newValue: T) {
+        val oldValue: C? = setter(glfwWindowHandle, newValue)
+        oldValue?.free()
     }
 }
