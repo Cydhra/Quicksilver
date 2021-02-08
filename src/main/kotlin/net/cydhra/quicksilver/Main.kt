@@ -1,5 +1,6 @@
 package net.cydhra.quicksilver
 
+import net.cydhra.quicksilver.ui.UIController
 import java.io.File
 
 fun main() {
@@ -10,4 +11,8 @@ fun main() {
     val installer = Installer(nativesDir)
     installer.installApplication()
     installer.loadApplication()
+
+    UIController.setupWindow()
+
+    while (true) {}
 }

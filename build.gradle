@@ -145,7 +145,7 @@ task extractNatives(type: Copy) {
 }
 
 application {
-    mainClassName = 'net.cydhra.quicksilver.server.QuickSilverServerKt'
+    mainClassName = 'net.cydhra.quicksilver.MainKt'
 }
 
 run {
