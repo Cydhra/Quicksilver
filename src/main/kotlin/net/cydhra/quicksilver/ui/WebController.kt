@@ -24,6 +24,10 @@ import com.labymedia.ultralight.UltralightView
 import com.labymedia.ultralight.bitmap.UltralightBitmapSurface
 import com.labymedia.ultralight.config.FontHinting
 import com.labymedia.ultralight.config.UltralightConfig
+import net.cydhra.quicksilver.ui.input.ClipboardAdapter
+import net.cydhra.quicksilver.ui.input.CursorAdapter
+import net.cydhra.quicksilver.ui.input.InputAdapter
+import net.cydhra.quicksilver.ui.listener.ExampleViewListener
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL12
 import java.nio.ByteBuffer
@@ -31,14 +35,41 @@ import java.nio.ByteBuffer
 /**
  * Class used for controlling the WebGUI rendered on top of the OpenGL GUI.
  */
-class WebController(/*cursorManager: CursorAdapter?*/) {
+class WebController(cursorManager: CursorAdapter) {
     private val platform: UltralightPlatform = UltralightPlatform.instance()
     private val renderer: UltralightRenderer
     private val view: UltralightView
-//    private val viewListener: ExampleViewListener
+    private val viewListener: ExampleViewListener
 //    private val loadListener: ExampleLoadListener
-//    private val inputAdapter: InputAdapter
+    private val inputAdapter: InputAdapter
     private var glTexture: Int
+
+    /**
+     * Constructs a new [WebController] and retrieves the platform.
+     *
+     * @param cursorManager Cursor manager for callbacks on cursor changes
+     */
+    init {
+        platform.setConfig(
+            UltralightConfig()
+                .resourcePath("./resources/")
+                .fontHinting(FontHinting.NORMAL)
+                .deviceScale(1.0)
+        )
+        platform.usePlatformFontLoader()
+//        platform.setFileSystem(ExampleFileSystem())
+//        platform.setLogger(ExampleLogger())
+        platform.setClipboard(ClipboardAdapter())
+        renderer = UltralightRenderer.create()
+        renderer.logMemoryUsage()
+        view = renderer.createView(300, 300, true)
+        viewListener = ExampleViewListener(cursorManager)
+        view.setViewListener(viewListener)
+//        loadListener = ExampleLoadListener(view)
+//        view.setLoadListener(loadListener)
+        glTexture = -1
+        inputAdapter = InputAdapter(view)
+    }
 
     /**
      * Loads the specified URL into this controller.
@@ -184,32 +215,5 @@ class WebController(/*cursorManager: CursorAdapter?*/) {
         GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE.toFloat())
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0)
         GL11.glDisable(GL11.GL_TEXTURE_2D)
-    }
-
-    /**
-     * Constructs a new [WebController] and retrieves the platform.
-     *
-     * @param cursorManager Cursor manager for callbacks on cursor changes
-     */
-    init {
-        platform.setConfig(
-            UltralightConfig()
-                .resourcePath("./resources/")
-                .fontHinting(FontHinting.NORMAL)
-                .deviceScale(1.0)
-        )
-        platform.usePlatformFontLoader()
-//        platform.setFileSystem(ExampleFileSystem())
-//        platform.setLogger(ExampleLogger())
-//        platform.setClipboard(ClipboardAdapter())
-        renderer = UltralightRenderer.create()
-        renderer.logMemoryUsage()
-        view = renderer.createView(300, 300, true)
-//        viewListener = ExampleViewListener(cursorManager)
-//        view.setViewListener(viewListener)
-//        loadListener = ExampleLoadListener(view)
-//        view.setLoadListener(loadListener)
-        glTexture = -1
-//        inputAdapter = InputAdapter(view)
     }
 }

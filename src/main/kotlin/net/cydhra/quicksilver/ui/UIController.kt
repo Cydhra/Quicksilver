@@ -1,5 +1,6 @@
 package net.cydhra.quicksilver.ui
 
+import net.cydhra.quicksilver.ui.input.CursorAdapter
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11.*
@@ -12,7 +13,7 @@ import java.util.concurrent.Executors
 
 object UIController {
 
-    private val webController = WebController()
+    private lateinit var webController: WebController
 
     // dedicated UI thread
     private val uiThreadExecutor = Executors.newSingleThreadExecutor()
@@ -32,6 +33,8 @@ object UIController {
      * Window setup
      */
     private fun doSetupWindow() {
+        glfwSetErrorCallback(this::onGLFWError);
+
         if(!glfwInit()) {
             throw IllegalStateException("Failed to initialize GLFW");
         }
@@ -40,6 +43,8 @@ object UIController {
         if(glfwWindowHandle == MemoryUtil.NULL) {
             throw IllegalStateException("Failed to create a GLFW window");
         }
+
+        webController = WebController(CursorAdapter(glfwWindowHandle))
 
         centerWindow()
         drawLoop()
@@ -113,9 +118,6 @@ object UIController {
         // Load a local test file
         webController.loadURL("https://google.com")
 
-        var lastTime: Double = glfwGetTime()
-        var frameCount = 0
-
         // Keep running until a window close is requested
         while (!glfwWindowShouldClose(glfwWindowHandle)) {
             // Poll events to keep the window responsive
@@ -135,6 +137,7 @@ object UIController {
         }
 
         doStop()
+        shutdown()
     }
 
     /**
@@ -146,5 +149,17 @@ object UIController {
         }
 
         glfwTerminate();
+    }
+
+    private fun shutdown() {
+        this.uiThreadExecutor.shutdown()
+    }
+
+    /**
+     * Callback notified when an error occurs in GLFW.
+     */
+    private fun onGLFWError(error: Int, message: Long) {
+        val strMessage = MemoryUtil.memUTF8(message)
+        System.err.println("[GLFW] Error($error): $strMessage")
     }
 }
