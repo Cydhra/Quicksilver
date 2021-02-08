@@ -13,6 +13,4 @@ fun main() {
     installer.loadApplication()
 
     UIController.setupWindow()
-
-    while (true) {}
 }
