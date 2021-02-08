@@ -142,7 +142,10 @@ class WebController(cursorManager: CursorAdapter) {
                 val y = dirtyBounds.y()
                 val dirtyWidth = dirtyBounds.width()
                 val dirtyHeight = dirtyBounds.height()
-                val startOffset = (y * bitmap.rowBytes() + x * 4) as Int
+
+                val bytes = bitmap.rowBytes()
+                val startOffset = (y * bytes + x * 4).toInt()
+
                 GL11.glTexSubImage2D(
                     GL11.GL_TEXTURE_2D,
                     0,
