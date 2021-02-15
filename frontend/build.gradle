@@ -44,7 +44,3 @@ kotlin {
         binaries.executable()
     }
 }
-
-jsJar {
-    archiveFileName = "out.jar"
-}

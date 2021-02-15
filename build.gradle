@@ -127,11 +127,9 @@ test {
 
 // Compile frontend module and copy its outputs into project resource output
 task compileFrontend(type: Copy) {
-    dependsOn ':frontend:jsJar'
+    dependsOn ':frontend:build'
 
-    from(zipTree(file("${project.findProject('frontend').buildDir}/libs/out.jar"))) {
-        exclude "META-INF/**"
-    }
+    from file("${project.findProject('frontend').buildDir}/distributions")
     into "${sourceSets.main.output.resourcesDir}/web"
 }
 
