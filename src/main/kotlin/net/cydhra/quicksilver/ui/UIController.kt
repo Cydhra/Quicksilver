@@ -173,8 +173,7 @@ object UIController {
         glEnable(GL_MULTISAMPLE)
         glClearColor(.2f, .2f, .2f, 1.0f)
 
-        // Load a local test file
-        webController.loadURL("file:///test.html")
+        webController.loadURL("file:///web/index.html")
 
         // Keep running until a window close is requested
         while (!glfwWindowShouldClose(glfwWindowHandle)) {
