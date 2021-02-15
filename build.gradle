@@ -157,4 +157,5 @@ run {
     dependsOn extractNatives
 
     workingDir file("$projectDir/run")
+    jvmArgs(["-Dquicksilver.web.url=http://localhost:8080"])
 }

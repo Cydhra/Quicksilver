@@ -173,7 +173,11 @@ object UIController {
         glEnable(GL_MULTISAMPLE)
         glClearColor(.2f, .2f, .2f, 1.0f)
 
-        webController.loadURL("file:///web/index.html")
+        val continuousWebDeployment = System.getProperty("quicksilver.web.url")
+        if (continuousWebDeployment == null)
+            webController.loadURL("file:///web/index.html")
+        else
+            webController.loadURL(continuousWebDeployment)
 
         // Keep running until a window close is requested
         while (!glfwWindowShouldClose(glfwWindowHandle)) {
