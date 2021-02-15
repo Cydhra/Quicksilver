@@ -1,10 +1,9 @@
 package net.cydhra.quicksilver.library
 
-import kotlinx.serialization.builtins.list
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.SetSerializer
 import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.builtins.set
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
 import net.cydhra.quicksilver.data.pack.GameInfo
 import net.cydhra.quicksilver.data.pack.GamePackDefinition
 import org.apache.logging.log4j.LogManager
@@ -14,7 +13,6 @@ class GameLibrary(val path: String) {
 
     companion object {
         private val logger = LogManager.getLogger()
-        private val json = Json(JsonConfiguration.Stable)
     }
 
     private val libraryDirectory = File(path)
@@ -26,7 +24,7 @@ class GameLibrary(val path: String) {
     fun initLibrary() {
         if (configFile.exists()) {
             logger.info("loading library index for \"${libraryDirectory.path}\"")
-            val games = json.parse(String.serializer().list, configFile.readText())
+            val games = Json.decodeFromString(ListSerializer(String.serializer()), configFile.readText())
             installedGames.putAll(games.map { game ->
                 val definitionFile = File(File(libraryDirectory, game), "$game.json")
                 game to definitionFile
@@ -77,14 +75,14 @@ class GameLibrary(val path: String) {
      */
     fun loadGameDefinition(id: String): Pair<File, GamePackDefinition> {
         val definitionFile = this.installedGames[id] ?: throw IllegalArgumentException("unknown game id")
-        val definition = json.parse(GamePackDefinition.serializer(), definitionFile.readText())
+        val definition = Json.decodeFromString(GamePackDefinition.serializer(), definitionFile.readText())
         return Pair(File(definitionFile.parent), definition)
     }
 
     private fun storeState() {
         configFile.writeText(
-            Json(JsonConfiguration.Stable).stringify(
-                String.serializer().set,
+            Json.encodeToString(
+                SetSerializer(String.serializer()),
                 this.installedGames.keys
             )
         )

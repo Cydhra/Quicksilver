@@ -1,12 +1,10 @@
 package net.cydhra.quicksilver.server
 
-import io.ktor.application.ApplicationCall
-import io.ktor.application.call
-import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
-import io.ktor.response.respond
-import io.ktor.response.respondTextWriter
-import io.ktor.util.pipeline.PipelineInterceptor
+import io.ktor.application.*
+import io.ktor.http.*
+import io.ktor.response.*
+import io.ktor.util.pipeline.*
+import kotlinx.serialization.json.Json
 import net.cydhra.quicksilver.data.pack.GameInfo
 import net.cydhra.quicksilver.launcher.QuicksilverLauncher
 
@@ -24,7 +22,7 @@ val gameInfoInterceptor: PipelineInterceptor<Unit, ApplicationCall> = intercepto
     } else {
         call.respondTextWriter(ContentType.Application.Json, HttpStatusCode.OK) {
             this.write(
-                serverJsonSerializer.stringify(GameInfo.serializer(), gameInfo)
+                Json.encodeToString(GameInfo.serializer(), gameInfo)
             )
         }
     }

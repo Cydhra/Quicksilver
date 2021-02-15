@@ -1,7 +1,6 @@
 package net.cydhra.quicksilver.library
 
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
 import net.cydhra.quicksilver.data.pack.GamePackDefinition
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -30,10 +29,9 @@ class GamePackSerializer(
      */
     fun pack(out: OutputStream) {
         val dataOut = DataOutputStream(out)
-        val json = Json(JsonConfiguration.Stable)
 
         dataOut.writeInt(GAME_PACK_MAGIC_BYTES)
-        dataOut.writeUTF(json.stringify(GamePackDefinition.serializer(), this.definition))
+        dataOut.writeUTF(Json.encodeToString(GamePackDefinition.serializer(), this.definition))
 
         val zipOutputStream = ZipOutputStream(out).apply { setLevel(9) }
 
@@ -90,7 +88,6 @@ class GamePackDeserializer(
 
         val inputStream = gamePackFile.inputStream()
         val dataInputStream = DataInputStream(inputStream)
-        val json = Json(JsonConfiguration.Stable)
 
         // check magic bytes
         val magic = dataInputStream.readInt()
@@ -99,7 +96,7 @@ class GamePackDeserializer(
 
         // read the game definition and parse it
         val definitionJson = dataInputStream.readUTF()
-        val definition = json.parse(GamePackDefinition.serializer(), definitionJson)
+        val definition = Json.decodeFromString(GamePackDefinition.serializer(), definitionJson)
 
         // create folder for game and write game definition file into it
         val destinationDirectory = File(libraryPath, definition.info.id)
