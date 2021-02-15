@@ -157,5 +157,8 @@ run {
     dependsOn extractNatives
 
     workingDir file("$projectDir/run")
-    jvmArgs(["-Dquicksilver.web.url=http://localhost:8080"])
+
+    def continuousUrl = project.findProperty("continuousUrl")?.toString()
+    if (continuousUrl != null)
+        jvmArgs(["-Dquicksilver.web.url=http://localhost:8080"])
 }
