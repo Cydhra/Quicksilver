@@ -40,7 +40,7 @@ object QuicksilverLauncher {
      */
     private val executor = Executors.newCachedThreadPool()
 
-    init {
+    fun init() {
         this.loadConfig()
         this.loadLibraries()
     }

@@ -23,6 +23,7 @@ import com.labymedia.ultralight.DatabindConfiguration
 import com.labymedia.ultralight.UltralightView
 import com.labymedia.ultralight.api.JavaAPI
 import com.labymedia.ultralight.plugin.loading.UltralightLoadListener
+import net.cydhra.quicksilver.launcher.QuicksilverLauncher
 import net.cydhra.quicksilver.ui.util.ViewContextProvider
 
 /**
@@ -125,6 +126,9 @@ class ExampleLoadListener(private val view: UltralightView) : UltralightLoadList
             // You can also set Javascript values.
             val translatedApi = databind.conversionUtils.toJavascript(context, javaApi)
             globalObject.setProperty("java", translatedApi, 0)
+
+            val translatedLauncher = databind.conversionUtils.toJavascript(context, QuicksilverLauncher)
+            globalObject.setProperty("launcher", translatedLauncher, 0)
         }
     }
 
